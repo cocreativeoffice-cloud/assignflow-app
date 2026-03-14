@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "builds": [
+    {"src": "Documents/尾関/assignflow/deploy/index.html", "use": "@vercel/static"}
+  ],
+  "routes": [
+    {"src": "/(.*)", "dest": "/Documents/尾関/assignflow/deploy/index.html"}
+  ]
+}
