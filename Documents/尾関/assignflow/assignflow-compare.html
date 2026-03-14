@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<title>assignflow — デザイン比較</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#141414;font-family:"Helvetica Neue",sans-serif;padding:20px 24px 60px;}
+
+/* ── ページヘッダー ── */
+.ph{text-align:center;margin-bottom:20px;}
+.ph h1{font-size:20px;font-weight:800;color:#E0E0E0;letter-spacing:-.5px;margin-bottom:4px;}
+.ph p{font-size:12px;color:#666;}
+
+/* ── 選択バー (sticky) ── */
+.sel-bar{
+  position:sticky;top:0;z-index:200;
+  background:#1C1C1C;border:1px solid #2A2A2A;border-radius:10px;
+  padding:10px 18px;margin-bottom:20px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.sel-txt{font-size:13px;color:#666;flex:1;}
+.sel-txt b{color:#C8A96E;}
+.sel-btn{
+  padding:7px 18px;border-radius:8px;border:none;
+  background:#C8A96E;color:#0A0A0F;
+  font-size:12px;font-weight:800;cursor:pointer;
+  display:none;
+}
+.sel-btn.visible{display:block;}
+
+/* ── グリッド ── */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+
+/* ── パネル ── */
+.panel{
+  border-radius:14px;overflow:hidden;cursor:pointer;
+  border:3px solid transparent;
+  transition:border-color .2s,box-shadow .2s,transform .15s;
+  position:relative;
+}
+.panel:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.5);}
+.panel.selected{border-color:#C8A96E;box-shadow:0 0 0 1px rgba(200,169,110,.3),0 8px 32px rgba(200,169,110,.15);}
+
+/* バッジ */
+.num-badge{
+  position:absolute;top:10px;left:10px;z-index:10;
+  width:24px;height:24px;border-radius:50%;
+  background:rgba(0,0,0,.55);color:#E0E0E0;
+  font-size:11px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,255,255,.15);
+}
+.panel.selected .num-badge{background:#C8A96E;color:#0A0A0F;border-color:#C8A96E;}
+.check-badge{
+  position:absolute;top:10px;right:10px;z-index:10;
+  width:22px;height:22px;border-radius:50%;
+  background:#C8A96E;color:#0A0A0F;
+  font-size:12px;font-weight:900;
+  display:none;align-items:center;justify-content:center;
+}
+.panel.selected .check-badge{display:flex;}
+
+/* ── テーマUI内部パーツ ── */
+.th-header{
+  padding:9px 14px;border-bottom:1px solid;
+  display:flex;align-items:center;gap:8px;
+}
+.th-logo{
+  width:22px;height:22px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:900;flex-shrink:0;
+}
+.th-logo-text{font-size:12px;font-weight:700;letter-spacing:-.3px;}
+.th-tabs{display:flex;gap:2px;margin-left:4px;}
+.th-tab{padding:3px 8px;border-radius:5px;font-size:9px;font-weight:600;}
+.th-tab.active{font-weight:700;}
+
+.th-body{padding:10px 12px;}
+.th-label{
+  font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  opacity:.45;margin-bottom:7px;
+}
+
+/* カード */
+.mc{border-radius:10px;padding:11px;border:1px solid;margin-bottom:6px;}
+.mc-top{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
+.mc-av{
+  width:32px;height:32px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:#B0E8C8;color:#0A0A0F;font-size:9px;font-weight:800;
+}
+.mc-name{font-size:12px;font-weight:700;line-height:1.2;}
+.mc-role{font-size:10px;opacity:.45;margin-top:1px;}
+.mc-pct{margin-left:auto;font-size:19px;font-weight:900;line-height:1;}
+
+/* プログレスバー */
+.pb-track{height:5px;border-radius:3px;overflow:hidden;margin-bottom:7px;}
+.pb-fill{height:100%;border-radius:3px;}
+
+/* アサイン行 */
+.ar{display:flex;align-items:center;gap:5px;padding:3px 5px;border-radius:5px;margin-bottom:3px;}
+.ar-badge{font-size:8px;padding:1px 5px;border-radius:7px;font-weight:700;flex-shrink:0;white-space:nowrap;}
+.ar-name{font-size:10px;flex:1;opacity:.65;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ar-h{font-size:9px;font-weight:700;opacity:.4;flex-shrink:0;}
+
+/* 空き帯 */
+.free-bar{margin-top:7px;padding-top:7px;border-top:1px solid;display:flex;justify-content:space-between;align-items:center;}
+.free-txt{font-size:10px;}
+.free-acc{font-size:9px;opacity:.25;font-family:monospace;}
+
+/* ステータスピル */
+.sp-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;}
+.sp{font-size:8px;padding:2px 7px;border-radius:20px;font-weight:700;border:1px solid;}
+</style>
+</head>
+<body>
+
+<div class="ph">
+  <h1>assignflow — デザイン10パターン比較</h1>
+  <p>パネルをクリックして選択 · 好みのパターン番号を伝えると本体に適用します</p>
+</div>
+
+<div class="sel-bar">
+  <div class="sel-txt" id="selTxt">クリックしてテーマを選択してください</div>
+  <button class="sel-btn" id="selBtn" onclick="copyNum()">番号をコピー</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const THEMES = [
+  {
+    id:1, name:"Elevated Dark",
+    bg:"#080810", card:"#14141F", text:"#F0EEE8", border:"#2A2A3A",
+    accent:"#C8A96E", hBorder:"#1E1E2A", tabBg:"rgba(200,169,110,0.15)",
+    barLow:"#4ECDC4", barMid:"#FFE66D", barHigh:"#FF6B6B",
+    trackBg:"#0A0A0F", rowBg:"#0A0A0F",
+  },
+  {
+    id:2, name:"Arctic Light",
+    bg:"#F4F4F6", card:"#FFFFFF", text:"#1A1A1A", border:"#E0E0E8",
+    accent:"#B8860B", hBorder:"#D8D8E0", tabBg:"rgba(184,134,11,0.12)",
+    barLow:"#2DB87F", barMid:"#D48A00", barHigh:"#CC3333",
+    trackBg:"#EFEFEF", rowBg:"#F8F8FB",
+  },
+  {
+    id:3, name:"Warm Linen",
+    bg:"#F2EDE4", card:"#FAF7F2", text:"#2C2417", border:"#DDD5C4",
+    accent:"#9B6E35", hBorder:"#D0C8B8", tabBg:"rgba(155,110,53,0.12)",
+    barLow:"#4A9B6E", barMid:"#C89020", barHigh:"#C44A2C",
+    trackBg:"#EDE8DF", rowBg:"#F4F0E8",
+  },
+  {
+    id:4, name:"Ocean Depth",
+    bg:"#080E1A", card:"#0D1525", text:"#D8E8F4", border:"#1A2A3A",
+    accent:"#4DA8E8", hBorder:"#142030", tabBg:"rgba(77,168,232,0.15)",
+    barLow:"#40C8C0", barMid:"#F0D060", barHigh:"#F07070",
+    trackBg:"#060A12", rowBg:"#06101C",
+  },
+  {
+    id:5, name:"Midnight Purple",
+    bg:"#0C0814", card:"#150F1E", text:"#E8E0F4", border:"#2A1840",
+    accent:"#A855F7", hBorder:"#200E30", tabBg:"rgba(168,85,247,0.15)",
+    barLow:"#4ECDC4", barMid:"#FFE66D", barHigh:"#FF6B6B",
+    trackBg:"#08050F", rowBg:"#0A0613",
+  },
+  {
+    id:6, name:"Neon Cyber",
+    bg:"#000000", card:"#090909", text:"#D8FFD8", border:"#0F1F0F",
+    accent:"#00FF88", hBorder:"#0A1A0A", tabBg:"rgba(0,255,136,0.08)",
+    barLow:"#00FF88", barMid:"#FFEE00", barHigh:"#FF4444",
+    trackBg:"#050505", rowBg:"#050505",
+  },
+  {
+    id:7, name:"Mono Sharp",
+    bg:"#0F0F0F", card:"#1A1A1A", text:"#FFFFFF", border:"#282828",
+    accent:"#FFD700", hBorder:"#222222", tabBg:"rgba(255,215,0,0.1)",
+    barLow:"#AAAAAA", barMid:"#FFD700", barHigh:"#FF6B6B",
+    trackBg:"#0A0A0A", rowBg:"#0C0C0C",
+  },
+  {
+    id:8, name:"Forest Ink",
+    bg:"#080F0A", card:"#0D160F", text:"#C8E8CC", border:"#182818",
+    accent:"#4ADE80", hBorder:"#122012", tabBg:"rgba(74,222,128,0.1)",
+    barLow:"#4ADE80", barMid:"#FFE066", barHigh:"#FF6666",
+    trackBg:"#050C07", rowBg:"#060D08",
+  },
+  {
+    id:9, name:"Warm Amber",
+    bg:"#0F0A05", card:"#1A1208", text:"#F0E8D0", border:"#2E1E08",
+    accent:"#F59E0B", hBorder:"#221808", tabBg:"rgba(245,158,11,0.12)",
+    barLow:"#F59E0B", barMid:"#FF8C00", barHigh:"#EF4444",
+    trackBg:"#0A0700", rowBg:"#0C0903",
+  },
+  {
+    id:10, name:"Slate",
+    bg:"#111318", card:"#1C2028", text:"#E8EBF0", border:"#252C38",
+    accent:"#60A5FA", hBorder:"#1E2530", tabBg:"rgba(96,165,250,0.12)",
+    barLow:"#60A5FA", barMid:"#FBBF24", barHigh:"#F87171",
+    trackBg:"#0D1018", rowBg:"#141820",
+  },
+];
+
+const statuses = [
+  { label:"継続",    color:"#4ECDC4", bg:"rgba(78,205,196,0.14)" },
+  { label:"本人承諾", color:"#A8E6CF", bg:"rgba(168,230,207,0.12)" },
+  { label:"打診中",  color:"#FFE66D", bg:"rgba(255,230,109,0.12)" },
+  { label:"提案中",  color:"#FFB347", bg:"rgba(255,179,71,0.12)"  },
+  { label:"完了",    color:"#555",    bg:"rgba(80,80,100,0.1)"   },
+];
+
+let selectedId = null;
+
+function buildPanel(t) {
+  const pct = 65;
+  const bar = pct >= 100 ? t.barHigh : pct > 70 ? t.barMid : t.barLow;
+
+  const panel = document.createElement('div');
+  panel.className = 'panel';
+  panel.dataset.id = t.id;
+
+  panel.innerHTML = `
+    <div class="num-badge">${t.id}</div>
+    <div class="check-badge">✓</div>
+
+    <!-- ヘッダー -->
+    <div class="th-header" style="background:${t.card};border-color:${t.hBorder};">
+      <div class="th-logo" style="background:linear-gradient(135deg,${t.accent},${t.accent}BB);">
+        <span style="color:#0A0A0F;font-weight:900;">A</span>
+      </div>
+      <span class="th-logo-text" style="color:${t.accent};">assignflow</span>
+      <div class="th-tabs">
+        <div class="th-tab active" style="background:${t.tabBg};color:${t.accent};">ダッシュ</div>
+        <div class="th-tab" style="color:${t.text};opacity:.35;">タイムライン</div>
+        <div class="th-tab" style="color:${t.text};opacity:.35;">メンバー</div>
+      </div>
+    </div>
+
+    <!-- ボディ -->
+    <div class="th-body" style="background:${t.bg};">
+      <div class="th-label" style="color:${t.text};">${t.id}. ${t.name}</div>
+
+      <!-- メンバーカード -->
+      <div class="mc" style="background:${t.card};border-color:${t.border};">
+        <div class="mc-top">
+          <div class="mc-av">AK</div>
+          <div>
+            <div class="mc-name" style="color:${t.text};">Aoi Kato</div>
+            <div class="mc-role" style="color:${t.text};">Art Director · Senior</div>
+          </div>
+          <div class="mc-pct" style="color:${bar};">${pct}<span style="font-size:10px;">%</span></div>
+        </div>
+
+        <div class="pb-track" style="background:${t.trackBg};">
+          <div class="pb-fill" style="width:${pct}%;background:${bar};"></div>
+        </div>
+
+        <div class="ar" style="background:${t.rowBg};">
+          <span class="ar-badge" style="background:rgba(78,205,196,.14);color:#4ECDC4;">継続</span>
+          <span class="ar-name" style="color:${t.text};">コーポレートサイト刷新</span>
+          <span class="ar-h" style="color:${t.text};">30h</span>
+        </div>
+        <div class="ar" style="background:${t.rowBg};">
+          <span class="ar-badge" style="background:rgba(255,230,109,.12);color:#FFE66D;">打診中</span>
+          <span class="ar-name" style="color:${t.text};">商品撮影・ビジュアル</span>
+          <span class="ar-h" style="color:${t.text};">20h</span>
+        </div>
+
+        <div class="free-bar" style="border-color:${t.border};">
+          <span class="free-txt" style="color:${t.barLow};">空き 70h</span>
+          <span class="free-acc" style="color:${t.text};">${t.accent}</span>
+        </div>
+      </div>
+
+      <!-- ステータスバッジ一覧 -->
+      <div class="sp-row">
+        ${statuses.map(s=>`<span class="sp" style="background:${s.bg};color:${s.color};border-color:${s.color}44;">${s.label}</span>`).join('')}
+      </div>
+    </div>
+  `;
+
+  panel.addEventListener('click', () => {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('selected'));
+    panel.classList.add('selected');
+    selectedId = t.id;
+    document.getElementById('selTxt').innerHTML =
+      `選択中: <b>${t.id}. ${t.name}</b> — この番号を伝えると本体に適用します`;
+    document.getElementById('selBtn').classList.add('visible');
+  });
+
+  return panel;
+}
+
+const grid = document.getElementById('grid');
+THEMES.forEach(t => grid.appendChild(buildPanel(t)));
+
+function copyNum() {
+  if (!selectedId) return;
+  navigator.clipboard.writeText(String(selectedId)).then(() => {
+    const btn = document.getElementById('selBtn');
+    btn.textContent = '✓ コピー済み';
+    setTimeout(() => btn.textContent = '番号をコピー', 1500);
+  });
+}
+</script>
+</body>
+</html>
